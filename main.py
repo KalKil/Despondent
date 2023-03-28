@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect
-import pymsql
+import pymysql
 import pymysql.cursors
 
 
@@ -14,20 +14,25 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
-Connection = pymsql.connect(
+connection = pymysql.connect(
     host ='10.100.33.60',
     user='Kwilliams3',
     password='223686940',
     database='kwilliams3_social_phones',
-    cursorclass=pymsql.cursors.DictCursor,
+    cursorclass=pymysql.cursors.DictCursor,
     autocommit=True
 )
 
 app.route('/feed')
-def post_feed:
+def post_feed():
 
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM `post` ORDER BY `timestamp`")
 
     results = cursor.fetchall()
-        "feed.html.jinja",
+
+    return render_template(
+    "feed.html.jinja",
+    posts=results
+)
+
