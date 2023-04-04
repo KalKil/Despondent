@@ -7,12 +7,17 @@
         <link href="/static/">
     </head>
     <body>
-    <h1> Post Feed </h1>
-    {% for post in post%}c
+    <h1> Post Feed {{current_user.username}} </h1>
+    {% for post in post%}
         <div>
             <img src="{{post['post_image']}}">
             <p>{{post['post_text']}}</p>
             {% endfor %}
+            <form action="/post" method="post" enctype="multipart/form-data">
+                <textarea name="post_text"></textarea>
+                <input name="post_image" type="file">
+                <input type = "submit">
+            </form>
         </div>
     </body>
 </html>       
