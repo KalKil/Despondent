@@ -76,6 +76,12 @@ def post_feed():
 def create_post():
     cursor = connection.cursor()
 
+    photo = request.files['post_image']
+
+    file_name = photo.filename
+
+    file_extension = file_name.split('.')[-1]
+
     user_id = current_user.id
 
     cursor.execute("INSERT INTO")
