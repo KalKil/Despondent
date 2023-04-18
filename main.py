@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, send_from_directory, abort
 
 from flask_login import LoginManager, login_required , login_user, current_user, logout_user                  
 
@@ -146,3 +146,74 @@ def sign_up():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+    @app.route('/Profile/<username>')
+    def user_Profile(username):
+        cursor = connection.cursor
+        cursor.execute("SELECT * FROM `users` WHERE `username` = %s",username)
+
+        result = cursor.fetchone()
+
+        return render_template("user_profile.html.jinja")
+    @app.get('/media/<path:path>')
+    def send_media(path):
+        return send_from_directory('media',path)
+
+@app.route('/post', methods=['POST'])
+@login_required
+def create_post():
+
+    user_id = current_user.id
+
+    cursor = connection.cursor()
+
+    Profile =request.files['File']
+    
+    file_name = Profile.filename # my_jgp
+    
+    file_extension = file_name.split('.')[-1]
+
+    if file_extension in ['jpg','jpeg', 'png', 'gif']:
+        Profile.save('media/posts/' + file_name)
+
+    else:
+        raise Exception('Invalid file type')
+
+    cursor.execute(
+        """INSERT INTO `posts` (`user_id`,`post_image`, `post_text`) VALUES (%s,%s,%s)""",
+        (user_id, file_name, request.form['Post'])
+    )
+    
+    return redirect('/feed')
+
+@app.route('/profile/<username>')
+def user_profile(username):
+    cursor=connection.cursor()
+
+    cursor.execute("SELECT * FROM `Users` WHERE `Username` = %s",(username))
+
+    result = cursor.fetchone()
+
+    if result is None:
+        abort(404)
+
+    cursor.close()
+       
+    cursor = connection.cursor()
+        
+    cursor.execute("SELCT * FROM `post` WHERE `user_id` = %s",(result['id']))
+    
+    post_result = cursor.fetchall()
+
+
+    return render_template("user_profile.html.jinja",user=result)
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('error_status.html.jinja'),404
+
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+    
