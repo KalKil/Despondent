@@ -71,23 +71,6 @@ def post_feed():
         posts = results
         )
 
-@app.route('/post', methods=['POST'])
-@login_required
-def create_post():
-    cursor = connection.cursor()
-
-    photo = request.files['post_image']
-
-    file_name = photo.filename
-
-    file_extension = file_name.split('.')[-1]
-
-    user_id = current_user.id
-
-    cursor.execute("INSERT INTO")
-
-    return redirect('/feed')
-
 
 @app.route('/sign-out')
 def sign_out():
@@ -144,20 +127,17 @@ def sign_up():
         return render_template("sign_up.html.jinja")
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route('/Profile/<username>')
+def user_Profile(username):
+    cursor = connection.cursor
+    cursor.execute("SELECT * FROM `users` WHERE `username` = %s",username)
 
-    @app.route('/Profile/<username>')
-    def user_Profile(username):
-        cursor = connection.cursor
-        cursor.execute("SELECT * FROM `users` WHERE `username` = %s",username)
+    result = cursor.fetchone()
 
-        result = cursor.fetchone()
-
-        return render_template("user_profile.html.jinja")
-    @app.get('/media/<path:path>')
-    def send_media(path):
-        return send_from_directory('media',path)
+    return render_template("user_profile.html.jinja")
+@app.get('/media/<path:path>')
+def send_media(path):
+    return send_from_directory('media',path)
 
 @app.route('/post', methods=['POST'])
 @login_required
@@ -215,5 +195,5 @@ def not_found_error(error):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
     
